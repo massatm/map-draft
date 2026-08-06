@@ -8,38 +8,57 @@ import './styles.css';
 export default function App() {
   const [draft, setDraft] = useState(null);
   const [lobby, setLobby] = useState(null);
+  const [player, setPlayer] = useState(null);
 
   useEffect(() => {
     if (!lobby) return;
-    return listenDraft(lobby, setDraft);
+    return listenDraft(lobby.code, setDraft);
   }, [lobby]);
 
   function start(data) {
-    setLobby(data.code);
-    setDraft(data.draft || { maps: MAPS, phase: 'ban', bans: [], picks: [] });
+    setLobby(data);
+    setPlayer(data.player || null);
+    setDraft(data.draft || {
+      maps: MAPS,
+      phase: 'ban',
+      bans: [],
+      picks: [],
+      turn: 0,
+      finished: false
+    });
   }
 
   function selectMap(map) {
-    if (!draft || !lobby) return;
+    if (!draft || !lobby || draft.finished) return;
+
     const next = {
       ...draft,
-      bans: draft.phase === 'ban' ? [...(draft.bans || []), map] : draft.bans,
-      picks: draft.phase === 'pick' ? [...(draft.picks || []), map] : draft.picks
+      bans: draft.phase === 'ban'
+        ? [...(draft.bans || []), map]
+        : draft.bans,
+      picks: draft.phase === 'pick'
+        ? [...(draft.picks || []), map]
+        : draft.picks,
+      turn: (draft.turn || 0) + 1
     };
-    updateDraft(lobby, next);
+
+    updateDraft(lobby.code, next);
   }
 
   return (
     <main className="app">
       <h1>🎮 Map Draft</h1>
       {!lobby ? (
-        <Lobby onStart={start} />
+        <Lobby onJoined={start} />
       ) : (
         <DraftBoard
           draft={draft}
           maps={draft?.maps || MAPS}
           phase={draft?.phase}
+          currentPlayer={player?.name}
           onSelect={selectMap}
+          bans={draft?.bans || []}
+          picks={draft?.picks || []}
         />
       )}
     </main>
