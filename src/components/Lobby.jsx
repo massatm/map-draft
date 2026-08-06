@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { createLobby, joinLobby } from '../lobbyService';
 
-export default function Lobby({ onJoined }) {
+export default function Lobby({ onStart }) {
   const [name, setName] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -9,7 +9,7 @@ export default function Lobby({ onJoined }) {
   async function create() {
     try {
       const lobby = await createLobby(name || 'Player');
-      onJoined(lobby);
+      onStart(lobby);
     } catch (e) {
       setError(e.message);
     }
@@ -18,7 +18,7 @@ export default function Lobby({ onJoined }) {
   async function join() {
     try {
       const lobby = await joinLobby(code.trim(), name || 'Player');
-      onJoined(lobby);
+      onStart(lobby);
     } catch (e) {
       setError(e.message);
     }
