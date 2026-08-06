@@ -49,7 +49,7 @@ export default function App() {
     <main className="app">
       <h1>🎮 Map Draft</h1>
       {!lobby ? (
-        <Lobby onJoined={start} />
+        <Lobby onStart={start} />
       ) : (
         <DraftBoard
           draft={draft}
