@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { ref, set, get, onValue } from "firebase/database";
+import { useState, useEffect } from "react";
 import { ref, set, get } from "firebase/database";
 import { database } from "./firebase";
 import { MAPS } from "./draftEngine";
@@ -107,3 +108,15 @@ export default function App() {
     </main>
   );
 }
+useEffect(() => {
+  if (!lobbyCode) return;
+
+  const lobbyRef = ref(
+    database,
+    `lobbies/${lobbyCode}/players`
+  );
+
+  return onValue(lobbyRef, (snapshot) => {
+    setPlayers(snapshot.val() || []);
+  });
+}, [lobbyCode]);
