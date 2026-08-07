@@ -312,18 +312,31 @@ export default function App() {
           {draft.phase !== "done" && (
             <div>
 
-              {MAPS.map((map) => (
+              <div className="map-grid">
+  {MAPS.map((map) => {
+    const isBan = (draft.bans || []).includes(map);
+    const isPick = (draft.picks || []).includes(map);
 
-                <button
-                  key={map}
-                  onClick={() => selectMap(map)}
-                  disabled={
-                    (draft.bans || []).includes(map) ||
-                    (draft.picks || []).includes(map)
-                  }
-                >
-                  {map}
-                </button>
+    return (
+      <div
+        key={map}
+        className={`map-card ${
+          isBan ? "map-ban" : ""
+        } ${
+          isPick ? "map-pick" : ""
+        }`}
+        onClick={() =>
+          !isBan && !isPick && selectMap(map)
+        }
+      >
+        {map}
+
+        {isBan && <span> ❌ Ban</span>}
+        {isPick && <span> ✅ Pick</span>}
+      </div>
+    );
+  })}
+</div>
 
               ))}
 
