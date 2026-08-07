@@ -14,6 +14,8 @@ export default function App() {
   const [lobbyCode, setLobbyCode] = useState(null);
   const [players, setPlayers] = useState([]);
   const [draft, setDraft] = useState(null);
+  const [playerIndex, setPlayerIndex] = useState(null);
+
 
   useEffect(() => {
     if (!lobbyCode) return;
@@ -25,6 +27,7 @@ export default function App() {
       }
     );
   }, [lobbyCode]);
+
 
   useEffect(() => {
     if (!lobbyCode) return;
@@ -73,6 +76,7 @@ export default function App() {
     );
 
     setLobbyCode(code);
+    setPlayerIndex(0);
   }
 
 
@@ -109,10 +113,9 @@ export default function App() {
     );
 
     setLobbyCode(codeInput);
+    setPlayerIndex(updatedPlayers.length - 1);
   }
-
-
-  async function startDraft() {
+    async function startDraft() {
     await update(
       ref(database, `lobbies/${lobbyCode}/draft`),
       {
@@ -128,22 +131,47 @@ export default function App() {
 
   async function selectMap(map) {
     if (!draft) return;
+    if (playerIndex === null) return;
 
     const bans = draft.bans || [];
     const picks = draft.picks || [];
+
+
+    // Prüfen wer dran ist
+    const allowedBan =
+      draft.phase === "ban" &&
+      draft.turn === playerIndex;
+
+
+    const allowedPick =
+      draft.phase === "pick" &&
+      draft.turn === playerIndex;
+
+
+    if (!allowedBan && !allowedPick) {
+      return;
+    }
+
 
     if (draft.phase === "ban") {
 
       if (bans.includes(map)) return;
 
-      const newBans = [...bans, map];
+      const newBans = [
+        ...bans,
+        map
+      ];
+
 
       await update(
         ref(database, `lobbies/${lobbyCode}/draft`),
         {
           bans: newBans,
           turn: draft.turn + 1,
-          phase: newBans.length === 4 ? "pick" : "ban"
+          phase:
+            newBans.length === 4
+              ? "pick"
+              : "ban"
         }
       );
     }
@@ -154,10 +182,15 @@ export default function App() {
       if (
         bans.includes(map) ||
         picks.includes(map)
-      ) return;
+      ) {
+        return;
+      }
 
 
-      const newPicks = [...picks, map];
+      const newPicks = [
+        ...picks,
+        map
+      ];
 
 
       if (newPicks.length === 4) {
@@ -171,7 +204,9 @@ export default function App() {
 
         const random =
           remaining[
-            Math.floor(Math.random() * remaining.length)
+            Math.floor(
+              Math.random() * remaining.length
+            )
           ];
 
 
@@ -202,6 +237,7 @@ export default function App() {
   }
 
 
+
   if (!lobbyCode) {
     return (
       <main className="app">
@@ -217,7 +253,9 @@ export default function App() {
           Lobby erstellen
         </button>
 
+
         <hr />
+
 
         <input
           placeholder="Lobby Code"
@@ -228,15 +266,20 @@ export default function App() {
         <button onClick={joinLobby}>
           Beitreten
         </button>
+
       </main>
     );
   }
 
 
+
   return (
     <main className="app">
 
-      <h1>Lobby {lobbyCode}</h1>
+      <h1>
+        Lobby {lobbyCode}
+      </h1>
+
 
       <h2>Spieler</h2>
 
@@ -245,6 +288,7 @@ export default function App() {
           {i + 1}. {p.name}
         </p>
       ))}
+
 
 
       {players.length === 4 &&
@@ -256,51 +300,70 @@ export default function App() {
       }
 
 
+
       {draft && draft.phase !== "waiting" && (
         <>
+
           <h2>
             Phase: {draft.phase}
           </h2>
 
+
           {draft.phase !== "done" && (
             <div>
+
               {MAPS.map((map) => (
+
                 <button
                   key={map}
+                  onClick={() => selectMap(map)}
                   disabled={
                     (draft.bans || []).includes(map) ||
                     (draft.picks || []).includes(map)
                   }
-                  onClick={() => selectMap(map)}
                 >
                   {map}
                 </button>
+
               ))}
+
             </div>
           )}
 
 
-          <h3>Bans</h3>
+
+          <h3>
+            Bans
+          </h3>
+
           <p>
             {(draft.bans || []).join(", ")}
           </p>
 
 
-          <h3>Picks</h3>
+
+          <h3>
+            Picks
+          </h3>
+
           <p>
             {(draft.picks || []).join(", ")}
           </p>
 
 
+
           {draft.phase === "done" && (
             <>
-              <h2>Ergebnis</h2>
+              <h2>
+                Ergebnis
+              </h2>
 
               {(draft.result || []).map((map) => (
                 <p key={map}>
                   🎯 {map}
                 </p>
               ))}
+
             </>
           )}
 
