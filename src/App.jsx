@@ -1,6 +1,5 @@
 import { ref, set, get, onValue } from "firebase/database";
 import { useState, useEffect } from "react";
-import { ref, set, get } from "firebase/database";
 import { database } from "./firebase";
 import { MAPS } from "./draftEngine";
 import "./style.css";
