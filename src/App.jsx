@@ -28,6 +28,24 @@ export default function App() {
   }, [lobbyCode]);
 
   async function createLobby() {
+    const code = createCode();
+
+    const lobby = {
+      players: [
+        {
+          name,
+          id: Date.now()
+        }
+      ],
+      phase: "waiting",
+      maps: MAPS
+    };
+
+    await set(ref(database, `lobbies/${code}`), lobby);
+
+    setLobbyCode(code);
+    setPlayers(lobby.players);
+  }
 
   async function joinLobby() {
     const snapshot = await get(
@@ -102,15 +120,3 @@ export default function App() {
     </main>
   );
 }
-useEffect(() => {
-  if (!lobbyCode) return;
-
-  const lobbyRef = ref(
-    database,
-    `lobbies/${lobbyCode}/players`
-  );
-
-  return onValue(lobbyRef, (snapshot) => {
-    setPlayers(snapshot.val() || []);
-  });
-}, [lobbyCode]);
