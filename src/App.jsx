@@ -43,12 +43,14 @@ export default function App() {
             bans: data.bans || [],
             picks: data.picks || [],
             turn: data.turn || 0,
-            result: data.result || []
+            result: data.result || [],
+            actions: data.actions || []
           });
         }
       }
     );
   }, [lobbyCode]);
+
 
 
   async function createLobby() {
@@ -66,18 +68,22 @@ export default function App() {
         bans: [],
         picks: [],
         turn: 0,
-        result: []
+        result: [],
+        actions: []
       }
     };
+
 
     await set(
       ref(database, `lobbies/${code}`),
       lobby
     );
 
+
     setLobbyCode(code);
     setPlayerIndex(0);
   }
+
 
 
   async function joinLobby() {
@@ -85,17 +91,21 @@ export default function App() {
       ref(database, `lobbies/${codeInput}`)
     );
 
+
     if (!snapshot.exists()) {
       alert("Lobby nicht gefunden");
       return;
     }
 
+
     const lobby = snapshot.val();
+
 
     if ((lobby.players || []).length >= 4) {
       alert("Lobby voll");
       return;
     }
+
 
     const updatedPlayers = [
       ...(lobby.players || []),
@@ -105,12 +115,14 @@ export default function App() {
       }
     ];
 
+
     await update(
       ref(database, `lobbies/${codeInput}`),
       {
         players: updatedPlayers
       }
     );
+
 
     setLobbyCode(codeInput);
     setPlayerIndex(updatedPlayers.length - 1);
@@ -123,21 +135,23 @@ export default function App() {
         bans: [],
         picks: [],
         turn: 0,
-        result: []
+        result: [],
+        actions: []
       }
     );
   }
+
 
 
   async function selectMap(map) {
     if (!draft) return;
     if (playerIndex === null) return;
 
+
     const bans = draft.bans || [];
     const picks = draft.picks || [];
 
 
-    // Prüfen wer dran ist
     const allowedBan =
       draft.phase === "ban" &&
       draft.turn === playerIndex;
@@ -153,9 +167,11 @@ export default function App() {
     }
 
 
+
     if (draft.phase === "ban") {
 
       if (bans.includes(map)) return;
+
 
       const newBans = [
         ...bans,
@@ -163,10 +179,21 @@ export default function App() {
       ];
 
 
+      const newActions = [
+        ...(draft.actions || []),
+        {
+          player: players[playerIndex]?.name,
+          action: "Ban",
+          map
+        }
+      ];
+
+
       await update(
         ref(database, `lobbies/${lobbyCode}/draft`),
         {
           bans: newBans,
+          actions: newActions,
           turn: draft.turn + 1,
           phase:
             newBans.length === 4
@@ -177,20 +204,30 @@ export default function App() {
     }
 
 
+
     if (draft.phase === "pick") {
 
       if (
         bans.includes(map) ||
         picks.includes(map)
-      ) {
-        return;
-      }
+      ) return;
 
 
       const newPicks = [
         ...picks,
         map
       ];
+
+
+      const newActions = [
+        ...(draft.actions || []),
+        {
+          player: players[playerIndex]?.name,
+          action: "Pick",
+          map
+        }
+      ];
+
 
 
       if (newPicks.length === 4) {
@@ -214,6 +251,7 @@ export default function App() {
           ref(database, `lobbies/${lobbyCode}/draft`),
           {
             picks: newPicks,
+            actions: newActions,
             result: [
               ...newPicks,
               random
@@ -226,10 +264,12 @@ export default function App() {
       }
 
 
+
       await update(
         ref(database, `lobbies/${lobbyCode}/draft`),
         {
           picks: newPicks,
+          actions: newActions,
           turn: draft.turn + 1
         }
       );
@@ -238,16 +278,21 @@ export default function App() {
 
 
 
+
+
   if (!lobbyCode) {
     return (
       <main className="app">
+
         <h1>🎮 Map Draft</h1>
+
 
         <input
           placeholder="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
+
 
         <button onClick={createLobby}>
           Lobby erstellen
@@ -263,6 +308,7 @@ export default function App() {
           onChange={(e) => setCodeInput(e.target.value)}
         />
 
+
         <button onClick={joinLobby}>
           Beitreten
         </button>
@@ -273,8 +319,11 @@ export default function App() {
 
 
 
+
+
   return (
     <main className="app">
+
 
       <h1>
         Lobby {lobbyCode}
@@ -283,11 +332,14 @@ export default function App() {
 
       <h2>Spieler</h2>
 
+
       {players.map((p, i) => (
         <p key={p.id}>
           {i + 1}. {p.name}
         </p>
       ))}
+
+
 
 
 
@@ -301,67 +353,86 @@ export default function App() {
 
 
 
+
+
       {draft && draft.phase !== "waiting" && (
         <>
+
 
           <h2>
             Phase: {draft.phase}
           </h2>
 
 
+
           {draft.phase !== "done" && (
-            <div>
+            <h3>
+              🔥 Jetzt dran: {
+                draft.phase === "ban"
+                  ? players[draft.turn]?.name
+                  : players[3 - draft.turn]?.name
+              }
+            </h3>
+          )}
 
-              <div className="map-grid">
-  {MAPS.map((map) => {
-    const isBan = (draft.bans || []).includes(map);
-    const isPick = (draft.picks || []).includes(map);
 
-    return (
-      <div
-        key={map}
-        className={`map-card ${
-          isBan ? "map-ban" : ""
-        } ${
-          isPick ? "map-pick" : ""
-        }`}
-        onClick={() =>
-          !isBan && !isPick && selectMap(map)
-        }
-      >
-        {map}
 
-        {isBan && <span> ❌ Ban</span>}
-        {isPick && <span> ✅ Pick</span>}
-      </div>
-    );
-  })}
-</div>
 
-              ))}
+          {draft.phase !== "done" && (
+            <div className="map-grid">
+
+              {MAPS.map((map) => {
+
+                const isBan =
+                  (draft.bans || []).includes(map);
+
+                const isPick =
+                  (draft.picks || []).includes(map);
+
+
+                return (
+                  <div
+                    key={map}
+                    className={`map-card ${
+                      isBan ? "map-ban" : ""
+                    } ${
+                      isPick ? "map-pick" : ""
+                    }`}
+                    onClick={() =>
+                      !isBan &&
+                      !isPick &&
+                      selectMap(map)
+                    }
+                  >
+                    {map}
+
+                    {isBan && " ❌"}
+                    {isPick && " ✅"}
+
+                  </div>
+                );
+              })}
 
             </div>
           )}
 
 
 
-          <h3>
-            Bans
-          </h3>
-
-          <p>
-            {(draft.bans || []).join(", ")}
-          </p>
 
 
 
           <h3>
-            Picks
+            Draft Verlauf
           </h3>
 
-          <p>
-            {(draft.picks || []).join(", ")}
-          </p>
+
+          {(draft.actions || []).map((a, i) => (
+            <p key={i}>
+              {a.player} → {a.action}: {a.map}
+            </p>
+          ))}
+
+
 
 
 
@@ -370,6 +441,7 @@ export default function App() {
               <h2>
                 Ergebnis
               </h2>
+
 
               {(draft.result || []).map((map) => (
                 <p key={map}>
@@ -380,8 +452,10 @@ export default function App() {
             </>
           )}
 
+
         </>
       )}
+
 
     </main>
   );
