@@ -1,39 +1,93 @@
 import { useState } from "react";
+import { ref, set, get } from "firebase/database";
+import { database } from "./firebase";
 import { MAPS } from "./draftEngine";
 import "./style.css";
 
+function createCode() {
+  return Math.random().toString(36).substring(2, 8).toUpperCase();
+}
+
 export default function App() {
-  const [started, setStarted] = useState(false);
-  const [bans, setBans] = useState([]);
-  const [picks, setPicks] = useState([]);
-  const [phase, setPhase] = useState("ban");
+  const [name, setName] = useState("");
+  const [codeInput, setCodeInput] = useState("");
+  const [lobbyCode, setLobbyCode] = useState(null);
+  const [players, setPlayers] = useState([]);
 
-  function selectMap(map) {
-    if (phase === "ban") {
-      const newBans = [...bans, map];
-      setBans(newBans);
+  async function createLobby() {
+    const code = createCode();
 
-      if (newBans.length === 4) {
-        setPhase("pick");
-      }
-    }
+    const lobby = {
+      players: [
+        {
+          name,
+          id: Date.now()
+        }
+      ],
+      phase: "waiting",
+      maps: MAPS
+    };
 
-    if (phase === "pick") {
-      const newPicks = [...picks, map];
-      setPicks(newPicks);
+    await set(ref(database, `lobbies/${code}`), lobby);
 
-      if (newPicks.length === 4) {
-        setPhase("done");
-      }
-    }
+    setLobbyCode(code);
+    setPlayers(lobby.players);
   }
 
-  if (!started) {
+  async function joinLobby() {
+    const snapshot = await get(
+      ref(database, `lobbies/${codeInput}`)
+    );
+
+    if (!snapshot.exists()) {
+      alert("Lobby nicht gefunden");
+      return;
+    }
+
+    const lobby = snapshot.val();
+
+    const updatedPlayers = [
+      ...(lobby.players || []),
+      {
+        name,
+        id: Date.now()
+      }
+    ];
+
+    await set(
+      ref(database, `lobbies/${codeInput}/players`),
+      updatedPlayers
+    );
+
+    setLobbyCode(codeInput);
+    setPlayers(updatedPlayers);
+  }
+
+  if (!lobbyCode) {
     return (
       <main className="app">
         <h1>🎮 Map Draft</h1>
-        <button onClick={() => setStarted(true)}>
-          Draft starten
+
+        <input
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <button onClick={createLobby}>
+          Lobby erstellen
+        </button>
+
+        <hr />
+
+        <input
+          placeholder="Lobby Code"
+          value={codeInput}
+          onChange={(e) => setCodeInput(e.target.value)}
+        />
+
+        <button onClick={joinLobby}>
+          Beitreten
         </button>
       </main>
     );
@@ -41,30 +95,15 @@ export default function App() {
 
   return (
     <main className="app">
-      <h1>🎮 Map Draft</h1>
+      <h1>Lobby {lobbyCode}</h1>
 
-      <h2>
-        {phase === "ban" && "Ban Phase"}
-        {phase === "pick" && "Pick Phase"}
-        {phase === "done" && "Ergebnis"}
-      </h2>
+      <h2>Spieler</h2>
 
-      <div className="maps">
-        {MAPS.map((map) => (
-          <button
-            key={map}
-            onClick={() => selectMap(map)}
-          >
-            {map}
-          </button>
-        ))}
-      </div>
-
-      <h3>Bans</h3>
-      <p>{bans.join(", ")}</p>
-
-      <h3>Picks</h3>
-      <p>{picks.join(", ")}</p>
+      {players.map((p) => (
+        <p key={p.id}>
+          ✅ {p.name}
+        </p>
+      ))}
     </main>
   );
 }
