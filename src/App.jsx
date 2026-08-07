@@ -1,40 +1,70 @@
-import { useState } from 'react';
-import Lobby from './components/Lobby';
-import DraftBoard from './components/DraftBoard';
-import { MAPS } from './draftEngine';
-import './styles.css';
+import { useState } from "react";
+import { MAPS } from "./draftEngine";
+import "./style.css";
 
 export default function App() {
-  const [lobby, setLobby] = useState(null);
+  const [started, setStarted] = useState(false);
+  const [bans, setBans] = useState([]);
+  const [picks, setPicks] = useState([]);
+  const [phase, setPhase] = useState("ban");
 
-  function start(data) {
-    setLobby(data);
+  function selectMap(map) {
+    if (phase === "ban") {
+      const newBans = [...bans, map];
+      setBans(newBans);
+
+      if (newBans.length === 4) {
+        setPhase("pick");
+      }
+    }
+
+    if (phase === "pick") {
+      const newPicks = [...picks, map];
+      setPicks(newPicks);
+
+      if (newPicks.length === 4) {
+        setPhase("done");
+      }
+    }
   }
 
-  const draft = {
-    maps: MAPS,
-    phase: 'ban',
-    bans: [],
-    picks: [],
-    turn: 0,
-    finished: false
-  };
+  if (!started) {
+    return (
+      <main className="app">
+        <h1>🎮 Map Draft</h1>
+        <button onClick={() => setStarted(true)}>
+          Draft starten
+        </button>
+      </main>
+    );
+  }
 
   return (
     <main className="app">
       <h1>🎮 Map Draft</h1>
-      {!lobby ? (
-        <Lobby onStart={start} />
-      ) : (
-        <DraftBoard
-          draft={draft}
-          maps={MAPS}
-          phase={draft.phase}
-          currentPlayer={lobby.player?.name}
-          bans={draft.bans}
-          picks={draft.picks}
-        />
-      )}
+
+      <h2>
+        {phase === "ban" && "Ban Phase"}
+        {phase === "pick" && "Pick Phase"}
+        {phase === "done" && "Ergebnis"}
+      </h2>
+
+      <div className="maps">
+        {MAPS.map((map) => (
+          <button
+            key={map}
+            onClick={() => selectMap(map)}
+          >
+            {map}
+          </button>
+        ))}
+      </div>
+
+      <h3>Bans</h3>
+      <p>{bans.join(", ")}</p>
+
+      <h3>Picks</h3>
+      <p>{picks.join(", ")}</p>
     </main>
   );
 }
