@@ -18,28 +18,35 @@ export default function App() {
   useEffect(() => {
     if (!lobbyCode) return;
 
-    const lobbyRef = ref(
-      database,
-      `lobbies/${lobbyCode}/players`
+    return onValue(
+      ref(database, `lobbies/${lobbyCode}/players`),
+      (snapshot) => {
+        setPlayers(snapshot.val() || []);
+      }
     );
-
-    return onValue(lobbyRef, (snapshot) => {
-      setPlayers(snapshot.val() || []);
-    });
   }, [lobbyCode]);
 
   useEffect(() => {
     if (!lobbyCode) return;
 
-    const draftRef = ref(
-      database,
-      `lobbies/${lobbyCode}/draft`
-    );
+    return onValue(
+      ref(database, `lobbies/${lobbyCode}/draft`),
+      (snapshot) => {
+        const data = snapshot.val();
 
-    return onValue(draftRef, (snapshot) => {
-      setDraft(snapshot.val());
-    });
+        if (data) {
+          setDraft({
+            phase: data.phase || "waiting",
+            bans: data.bans || [],
+            picks: data.picks || [],
+            turn: data.turn || 0,
+            result: data.result || []
+          });
+        }
+      }
+    );
   }, [lobbyCode]);
+
 
   async function createLobby() {
     const code = createCode();
@@ -67,6 +74,7 @@ export default function App() {
 
     setLobbyCode(code);
   }
+
 
   async function joinLobby() {
     const snapshot = await get(
@@ -102,7 +110,9 @@ export default function App() {
 
     setLobbyCode(codeInput);
   }
-    async function startDraft() {
+
+
+  async function startDraft() {
     await update(
       ref(database, `lobbies/${lobbyCode}/draft`),
       {
@@ -115,51 +125,64 @@ export default function App() {
     );
   }
 
+
   async function selectMap(map) {
     if (!draft) return;
 
-    const playerTurn = draft.turn;
+    const bans = draft.bans || [];
+    const picks = draft.picks || [];
 
     if (draft.phase === "ban") {
-      if (draft.bans.includes(map)) return;
 
-      const bans = [...draft.bans, map];
+      if (bans.includes(map)) return;
+
+      const newBans = [...bans, map];
 
       await update(
         ref(database, `lobbies/${lobbyCode}/draft`),
         {
-          bans,
-          turn: playerTurn + 1,
-          phase: bans.length === 4 ? "pick" : "ban"
+          bans: newBans,
+          turn: draft.turn + 1,
+          phase: newBans.length === 4 ? "pick" : "ban"
         }
       );
     }
 
+
     if (draft.phase === "pick") {
+
       if (
-        draft.picks.includes(map) ||
-        draft.bans.includes(map)
+        bans.includes(map) ||
+        picks.includes(map)
       ) return;
 
-      const picks = [...draft.picks, map];
 
-      if (picks.length === 4) {
+      const newPicks = [...picks, map];
+
+
+      if (newPicks.length === 4) {
+
         const remaining = MAPS.filter(
           (m) =>
-            !draft.bans.includes(m) &&
-            !picks.includes(m)
+            !bans.includes(m) &&
+            !newPicks.includes(m)
         );
+
 
         const random =
           remaining[
             Math.floor(Math.random() * remaining.length)
           ];
 
+
         await update(
           ref(database, `lobbies/${lobbyCode}/draft`),
           {
-            picks,
-            result: [...picks, random],
+            picks: newPicks,
+            result: [
+              ...newPicks,
+              random
+            ],
             phase: "done"
           }
         );
@@ -167,11 +190,12 @@ export default function App() {
         return;
       }
 
+
       await update(
         ref(database, `lobbies/${lobbyCode}/draft`),
         {
-          picks,
-          turn: playerTurn + 1
+          picks: newPicks,
+          turn: draft.turn + 1
         }
       );
     }
@@ -238,17 +262,16 @@ export default function App() {
             Phase: {draft.phase}
           </h2>
 
-
           {draft.phase !== "done" && (
             <div>
               {MAPS.map((map) => (
                 <button
                   key={map}
-                  onClick={() => selectMap(map)}
                   disabled={
-                    draft.bans.includes(map) ||
-                    draft.picks.includes(map)
+                    (draft.bans || []).includes(map) ||
+                    (draft.picks || []).includes(map)
                   }
+                  onClick={() => selectMap(map)}
                 >
                   {map}
                 </button>
@@ -259,26 +282,28 @@ export default function App() {
 
           <h3>Bans</h3>
           <p>
-            {draft.bans.join(", ")}
+            {(draft.bans || []).join(", ")}
           </p>
 
 
           <h3>Picks</h3>
           <p>
-            {draft.picks.join(", ")}
+            {(draft.picks || []).join(", ")}
           </p>
 
 
           {draft.phase === "done" && (
             <>
               <h2>Ergebnis</h2>
-              {draft.result.map((map) => (
+
+              {(draft.result || []).map((map) => (
                 <p key={map}>
                   🎯 {map}
                 </p>
               ))}
             </>
           )}
+
         </>
       )}
 
