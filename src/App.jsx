@@ -73,12 +73,10 @@ export default function App() {
       }
     };
 
-
     await set(
       ref(database, `lobbies/${code}`),
       lobby
     );
-
 
     setLobbyCode(code);
     setPlayerIndex(0);
@@ -127,7 +125,10 @@ export default function App() {
     setLobbyCode(codeInput);
     setPlayerIndex(updatedPlayers.length - 1);
   }
-    async function startDraft() {
+
+
+
+  async function startDraft() {
     await update(
       ref(database, `lobbies/${lobbyCode}/draft`),
       {
@@ -144,6 +145,7 @@ export default function App() {
 
 
   async function selectMap(map) {
+
     if (!draft) return;
     if (playerIndex === null) return;
 
@@ -157,9 +159,9 @@ export default function App() {
       draft.turn === playerIndex;
 
 
-const allowedPick =
-  draft.phase === "pick" &&
-  draft.turn === (3 - playerIndex);
+    const allowedPick =
+      draft.phase === "pick" &&
+      draft.turn === (3 - playerIndex);
 
 
     if (!allowedBan && !allowedPick) {
@@ -189,23 +191,24 @@ const allowedPick =
       ];
 
 
-await update(
-  ref(database, `lobbies/${lobbyCode}/draft`),
-  {
-    bans: newBans,
-    actions: newActions,
-    turn: newBans.length === 4 ? 0 : draft.turn + 1,
-    phase: newBans.length === 4 ? "pick" : "ban"
-  }
-);
-
-
-    if (draft.phase === "pick") {
+      await update(
+        ref(database, `lobbies/${lobbyCode}/draft`),
+        {
+          bans: newBans,
+          actions: newActions,
+          turn: newBans.length === 4 ? 0 : draft.turn + 1,
+          phase: newBans.length === 4 ? "pick" : "ban"
+        }
+      );
+    }
+        if (draft.phase === "pick") {
 
       if (
         bans.includes(map) ||
         picks.includes(map)
-      ) return;
+      ) {
+        return;
+      }
 
 
       const newPicks = [
@@ -273,8 +276,6 @@ await update(
 
 
 
-
-
   if (!lobbyCode) {
     return (
       <main className="app">
@@ -315,10 +316,8 @@ await update(
 
 
 
-
   return (
     <main className="app">
-
 
       <h1>
         Lobby {lobbyCode}
@@ -336,8 +335,6 @@ await update(
 
 
 
-
-
       {players.length === 4 &&
         draft?.phase === "waiting" && (
           <button onClick={startDraft}>
@@ -348,11 +345,8 @@ await update(
 
 
 
-
-
       {draft && draft.phase !== "waiting" && (
         <>
-
 
           <h2>
             Phase: {draft.phase}
@@ -369,7 +363,6 @@ await update(
               }
             </h3>
           )}
-
 
 
 
@@ -399,6 +392,7 @@ await update(
                       selectMap(map)
                     }
                   >
+
                     {map}
 
                     {isBan && " ❌"}
@@ -406,13 +400,11 @@ await update(
 
                   </div>
                 );
+
               })}
 
             </div>
           )}
-
-
-
 
 
 
@@ -426,8 +418,6 @@ await update(
               {a.player} → {a.action}: {a.map}
             </p>
           ))}
-
-
 
 
 
@@ -447,10 +437,8 @@ await update(
             </>
           )}
 
-
         </>
       )}
-
 
     </main>
   );
