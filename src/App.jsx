@@ -30,16 +30,23 @@ export default function App() {
   async function createLobby() {
     const code = createCode();
 
-    const lobby = {
-      players: [
-        {
-          name,
-          id: Date.now()
-        }
-      ],
-      phase: "waiting",
-      maps: MAPS
-    };
+ const lobby = {
+  players: [
+    {
+      name,
+      id: Date.now()
+    }
+  ],
+  phase: "waiting",
+  maps: MAPS,
+  draft: {
+    phase: "ban",
+    bans: [],
+    picks: [],
+    turn: 0,
+    finished: false
+  }
+};
 
     await set(ref(database, `lobbies/${code}`), lobby);
 
