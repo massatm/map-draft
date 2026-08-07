@@ -157,9 +157,9 @@ export default function App() {
       draft.turn === playerIndex;
 
 
-    const allowedPick =
-      draft.phase === "pick" &&
-      draft.turn === playerIndex;
+const allowedPick =
+  draft.phase === "pick" &&
+  draft.turn === (3 - playerIndex);
 
 
     if (!allowedBan && !allowedPick) {
