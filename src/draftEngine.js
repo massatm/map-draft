@@ -1,6 +1,14 @@
 export const MAPS = [
-  'Map 1','Map 2','Map 3','Map 4','Map 5',
-  'Map 6','Map 7','Map 8','Map 9','Map 10'
+  "Germany",
+  "South Korea",
+  "Canada",
+  "Australia",
+  "Hungary",
+  "Japan",
+  "Norway",
+  "Poland",
+  "Saudi Arabia",
+  "Argentina"
 ];
 
 export function createDraft(players = []) {
