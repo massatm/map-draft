@@ -1,58 +1,129 @@
 body {
   margin: 0;
-  font-family: Arial, sans-serif;
-  background: #111827;
+  min-height: 100vh;
+  background: #0b0f19;
   color: white;
+  font-family: Arial, Helvetica, sans-serif;
 }
 
-.container {
-  min-height: 100vh;
+
+.app {
+  max-width: 900px;
+  margin: 40px auto;
   padding: 30px;
-  text-align: center;
+  background: #151b2b;
+  border-radius: 16px;
+  box-shadow: 0 0 40px rgba(0,0,0,.4);
 }
+
 
 h1 {
+  text-align: center;
   font-size: 42px;
+  margin-bottom: 30px;
 }
+
 
 h2 {
-  margin-top: 10px;
+  margin-top: 25px;
 }
 
-.maps {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 15px;
-  max-width: 900px;
-  margin: 30px auto;
+
+input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: 1px solid #333;
+  background: #0f1524;
+  color: white;
+  font-size: 16px;
 }
+
 
 button {
-  padding: 20px;
-  font-size: 18px;
-  border-radius: 12px;
-  border: none;
-  cursor: pointer;
-  background: #374151;
+  background: #2563eb;
   color: white;
-  transition: 0.2s;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  margin: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: .2s;
 }
+
 
 button:hover {
-  transform: scale(1.05);
-  background: #4b5563;
+  transform: translateY(-2px);
+  background: #3b82f6;
 }
 
-.random {
-  background: #2563eb;
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: .35;
+  transform: none;
 }
+
+
+/* Map Karten */
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+}
+
+
+.map-card {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1e293b,
+      #334155
+    );
+
+  border-radius: 14px;
+  font-size: 20px;
+  font-weight: bold;
+
+  cursor: pointer;
+  transition: .2s;
+}
+
+
+.map-card:hover {
+  scale: 1.05;
+}
+
+
+.map-ban {
+  background: #7f1d1d;
+}
+
+
+.map-pick {
+  background: #166534;
+}
+
+
+.status {
+  padding: 15px;
+  border-radius: 12px;
+  background: #111827;
+  margin: 15px 0;
+}
+
 
 .result {
-  margin-top: 40px;
-  background: #1f2937;
-  padding: 20px;
-  border-radius: 15px;
-  max-width: 500px;
-  margin-left: auto;
-  margin-right: auto;
+  background: #854d0e;
+  padding: 15px;
+  border-radius: 12px;
 }
