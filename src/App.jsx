@@ -189,20 +189,15 @@ const allowedPick =
       ];
 
 
-      await update(
-        ref(database, `lobbies/${lobbyCode}/draft`),
-        {
-          bans: newBans,
-          actions: newActions,
-          turn: draft.turn + 1,
-          phase:
-            newBans.length === 4
-              ? "pick"
-              : "ban"
-        }
-      );
-    }
-
+await update(
+  ref(database, `lobbies/${lobbyCode}/draft`),
+  {
+    bans: newBans,
+    actions: newActions,
+    turn: newBans.length === 4 ? 0 : draft.turn + 1,
+    phase: newBans.length === 4 ? "pick" : "ban"
+  }
+);
 
 
     if (draft.phase === "pick") {
