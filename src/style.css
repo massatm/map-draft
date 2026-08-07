@@ -1,129 +1,260 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: #0b0f19;
+  background:
+    radial-gradient(circle at top, #1e293b, #05070d 60%);
   color: white;
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: "Arial", sans-serif;
 }
 
 
 .app {
-  max-width: 900px;
-  margin: 40px auto;
-  padding: 30px;
-  background: #151b2b;
-  border-radius: 16px;
-  box-shadow: 0 0 40px rgba(0,0,0,.4);
+  max-width: 1100px;
+  margin: 30px auto;
+  padding: 35px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(20,30,50,.95),
+      rgba(5,10,20,.95)
+    );
+
+  border-radius: 20px;
+
+  border: 1px solid rgba(255,255,255,.1);
+
+  box-shadow:
+    0 0 50px rgba(0,0,0,.8);
 }
 
 
 h1 {
   text-align: center;
-  font-size: 42px;
-  margin-bottom: 30px;
+  font-size: 48px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+
+  background:
+    linear-gradient(
+      90deg,
+      #ef4444,
+      #facc15
+    );
+
+  -webkit-background-clip: text;
+  color: transparent;
 }
+
 
 
 h2 {
-  margin-top: 25px;
+  border-left: 5px solid #ef4444;
+  padding-left: 12px;
 }
+
 
 
 input {
   width: 100%;
-  box-sizing: border-box;
-  padding: 14px;
-  margin: 8px 0;
-  border-radius: 10px;
-  border: 1px solid #333;
-  background: #0f1524;
-  color: white;
-  font-size: 16px;
+  padding: 15px;
+
+  background: #0f172a;
+  color:white;
+
+  border:
+    1px solid #334155;
+
+  border-radius:12px;
+
+  font-size:16px;
 }
 
 
+
 button {
-  background: #2563eb;
-  color: white;
-  border: none;
-  border-radius: 12px;
-  padding: 14px 20px;
-  margin: 8px;
-  cursor: pointer;
-  font-size: 16px;
-  transition: .2s;
+
+  background:
+    linear-gradient(
+      135deg,
+      #ef4444,
+      #b91c1c
+    );
+
+  border:none;
+
+  color:white;
+
+  padding:15px 25px;
+
+  border-radius:12px;
+
+  font-weight:bold;
+
+  cursor:pointer;
+
+  transition:.2s;
+
 }
 
 
 button:hover {
-  transform: translateY(-2px);
-  background: #3b82f6;
+  transform:scale(1.05);
 }
 
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: .35;
-  transform: none;
+
+/* Spieler */
+
+.player-card {
+
+  background:#111827;
+
+  padding:12px;
+
+  margin:8px 0;
+
+  border-radius:10px;
+
+  border-left:4px solid #facc15;
 }
 
 
-/* Map Karten */
+
+
+/* Map Auswahl */
+
 .map-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-top: 20px;
+
+  display:grid;
+
+  grid-template-columns:
+  repeat(5,1fr);
+
+  gap:18px;
+
+  margin-top:25px;
+
 }
+
 
 
 .map-card {
-  height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+  height:120px;
+
+  display:flex;
+
+  align-items:center;
+
+  justify-content:center;
+
+  flex-direction:column;
+
 
   background:
+
     linear-gradient(
       135deg,
       #1e293b,
       #334155
     );
 
-  border-radius: 14px;
-  font-size: 20px;
-  font-weight: bold;
 
-  cursor: pointer;
-  transition: .2s;
+  border-radius:16px;
+
+
+  font-size:22px;
+
+  font-weight:bold;
+
+
+  cursor:pointer;
+
+
+  border:
+
+    2px solid transparent;
+
+
+  transition:.2s;
+
 }
+
 
 
 .map-card:hover {
-  scale: 1.05;
+
+  border-color:#facc15;
+
+  transform:
+  translateY(-5px);
+
 }
+
+
 
 
 .map-ban {
-  background: #7f1d1d;
+
+  background:
+    linear-gradient(
+      135deg,
+      #7f1d1d,
+      #450a0a
+    );
+
+  opacity:.8;
+
 }
+
 
 
 .map-pick {
-  background: #166534;
+
+  background:
+    linear-gradient(
+      135deg,
+      #166534,
+      #052e16
+    );
+
 }
+
 
 
 .status {
-  padding: 15px;
-  border-radius: 12px;
-  background: #111827;
-  margin: 15px 0;
+
+  text-align:center;
+
+  padding:20px;
+
+  margin:20px 0;
+
+  background:#020617;
+
+  border-radius:15px;
+
+  font-size:24px;
+
+  font-weight:bold;
+
 }
 
 
+
 .result {
-  background: #854d0e;
-  padding: 15px;
-  border-radius: 12px;
+
+  background:
+
+  linear-gradient(
+    135deg,
+    #854d0e,
+    #422006
+  );
+
+  padding:20px;
+
+  border-radius:15px;
+
 }
